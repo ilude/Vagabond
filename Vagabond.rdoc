@@ -1,5 +1,43 @@
-= Vagabond
+= <tt>Vagabond</tt>
 
-Generate this with
-    Vagabond rdoc
-After you have described your command line interface
+Manage Virtualbox virtual machines from ISO images to running boxes
+
+    Vagabond [global options] command_name [command-specific options] [--] arguments...
+
+* Use the command +help+ to get a summary of commands
+* Use the command <tt>help command_name</tt> to get a help for +command_name+
+* Use <tt>--</tt> to stop command line argument processing; useful if your arguments have dashes in them
+
+== Global Options
+These options are available for any command and are specified before the name of the command
+
+[<tt>--help</tt>] Show this message
+[<tt>-v, --version</tt>] Print Vagabond Version
+== Commands
+[<tt>help</tt>] Shows list of commands or help for one command
+[<tt>mkbox</tt>] Create a new virtual machine image
+[<tt>rmbox</tt>] Destroy a virtual machine image
+
+=== <tt>help [command]</tt>
+
+Shows list of commands or help for one command
+
+Gets help for the application or its commands.  Can also list the commands in a way helpful to creating a bash-style completion function
+
+==== Options
+These options are specified *after* the command.
+
+[<tt>-c, --completion</tt>] List all commands one line at a time, for use with shell completion ([command] argument is partial command to match)
+=== <tt>mkbox The name of the virtual machine</tt>
+
+Create a new virtual machine image
+
+==== Options
+These options are specified *after* the command.
+
+[<tt>-f, --force</tt>] Overwrite existing virtual machine if it exists
+[<tt>-t, --template=arg</tt>] The name of the template to use <i>( default: <tt>ubuntu-12.04-server-amd64</tt>)</i>
+=== <tt>rmbox The name of the virtual machine</tt>
+
+Destroy a virtual machine image
+
