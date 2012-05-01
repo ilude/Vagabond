@@ -1,0 +1,6 @@
+= Vagabond
+
+Describe your project here
+
+:include:Vagabond.rdoc
+

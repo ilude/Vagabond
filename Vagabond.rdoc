@@ -1,0 +1,5 @@
+= Vagabond
+
+Generate this with
+    Vagabond rdoc
+After you have described your command line interface
