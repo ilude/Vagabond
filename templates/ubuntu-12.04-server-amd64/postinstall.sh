@@ -11,6 +11,7 @@ setterm -blank 0
 # etc., and remove optional things to trim down the machine.
 apt-get -y update
 apt-get -y upgrade
+apt-get -y dist-upgrade
 apt-get -y install linux-headers-$(uname -r)
 apt-get -y install build-essential libreadline6 libreadline6-dev zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison curl git subversion 
 
@@ -82,5 +83,6 @@ echo "Adding a 2 sec delay to the interface up, to make the dhclient happy"
 echo "pre-up sleep 2" >> /etc/network/interfaces
 
 mv /etc/rc.local.orig /etc/rc.local
+rm /etc/rc.local.orig
 
 exit 0 
