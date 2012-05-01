@@ -1,0 +1,22 @@
+PATH
+  remote: .
+  specs:
+    Vagabond (0.0.1)
+      gli
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    gli (1.6.0)
+    json (1.7.0)
+    rake (0.9.2.2)
+    rdoc (3.12)
+      json (~> 1.4)
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  Vagabond!
+  rake
+  rdoc

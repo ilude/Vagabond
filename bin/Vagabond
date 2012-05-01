@@ -13,21 +13,21 @@ end
 $: << File.expand_path(File.dirname(File.realpath(__FILE__)) + '/../lib')
 require 'rubygems'
 require 'gli'
-require 'Vagabond_version'
+require 'vagabond'
 
 include GLI
 
-program_desc 'Describe your application here'
+program_desc Vagabond::DESCRIPTION
 
 version Vagabond::VERSION
 
-desc 'Describe some switch here'
-switch [:s,:switch]
+desc 'Print Vagabond Version'
+switch [:v,:version]
 
-desc 'Describe some flag here'
-default_value 'the default'
-arg_name 'The name of the argument'
-flag [:f,:flagname]
+#desc 'Describe some flag here'
+#default_value 'the default'
+#arg_name 'The name of the argument'
+#flag [:f,:flagname]
 
 desc 'Describe mkbox here'
 arg_name 'Describe arguments to mkbox here'
@@ -60,7 +60,12 @@ pre do |global,command,options,args|
   # chosen command
   # Use skips_pre before a command to skip this block
   # on that command only
-  true
+  if global[:v]
+    puts "Vagabond #{Vagabond::VERSION}"
+    false
+  else
+    true
+  end
 end
 
 post do |global,command,options,args|

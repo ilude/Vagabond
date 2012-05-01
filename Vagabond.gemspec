@@ -1,5 +1,7 @@
 # Ensure we require the local version and not one we might have installed already
-require File.join([File.dirname(__FILE__),'lib','Vagabond_version.rb'])
+$:.push File.expand_path("../lib", __FILE__)
+require File.join([File.dirname(__FILE__),'lib','vagabond.rb'])
+
 spec = Gem::Specification.new do |s| 
   s.name = 'Vagabond'
   s.version = Vagabond::VERSION
@@ -7,11 +9,11 @@ spec = Gem::Specification.new do |s|
   s.email = 'mglenn@ilude.com'
   s.homepage = 'http://www.ilude.com'
   s.platform = Gem::Platform::RUBY
-  s.summary = 'Manage Virtualbox virtual machines from ISO images to running boxes'
+  s.summary = Vagabond::DESCRIPTION
 # Add your other files here if you make them
   s.files = %w(
 bin/Vagabond
-lib/Vagabond_version.rb
+lib/vagabond.rb
   )
   s.require_paths << 'lib'
   s.has_rdoc = true
