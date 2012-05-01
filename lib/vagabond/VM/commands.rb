@@ -72,7 +72,7 @@ module Vagabond
           end
 
           execute "controlvm \"#{boxname}\" keyboardputscancode #{keycode}"
-          puts "controlvm \"#{boxname}\" keyboardputscancode #{keycode}"
+          #puts "controlvm \"#{boxname}\" keyboardputscancode #{keycode}"
           sleep 0.01 
         }
       end
@@ -190,6 +190,10 @@ module Vagabond
           process.close
         end
         
+        if $?.exitstatus!= 0
+          raise "executing #{@virtualbox_command} #{args}"
+        end
+
         output
       end
     end

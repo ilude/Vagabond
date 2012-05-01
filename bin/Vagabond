@@ -29,28 +29,39 @@ switch [:v,:version]
 #arg_name 'The name of the argument'
 #flag [:f,:flagname]
 
-desc 'Describe mkbox here'
-arg_name 'Describe arguments to mkbox here'
+desc 'Create a new virtual machine image'
+arg_name 'The name of the virtual machine'
 command :mkbox do |c|
-  c.desc 'Describe a switch to mkbox'
-  c.switch :s
+  c.desc 'Overwrite existing virtual machine if it exists'
+  c.switch [:f, :force]
 
-  c.desc 'Describe a flag to mkbox'
-  c.default_value 'default'
-  c.flag :f
+  c.desc 'The name of the template to use'
+  c.default_value 'ubuntu-12.04-server-amd64'
+  c.flag [:t, :template]
   c.action do |global_options,options,args|
+    if args.length < 1
+      raise 'You must specify the name of your VM'
+    end
 
-    # Your command logic here
-     
-    # If you have any errors, just raise them
-    # raise "that command made no sense"
+    if options[:f]
+      box = Vagabond::Box.find(args[0])
+      box.destroy if !box.nil?
+    end
+
+    box = Vagabond::Box.create(args[0], Vagabond::Environment.new) do
+      self.template = options[:t]
+    end
+    box.build
+    
   end
 end
 
-desc 'Describe rmbox here'
-arg_name 'Describe arguments to rmbox here'
+desc 'Destroy a virtual machine image'
+arg_name 'The name of the virtual machine'
 command :rmbox do |c|
   c.action do |global_options,options,args|
+    box = Vagabond::Box.find(args[0])
+    box.destroy if !box.nil?
   end
 end
 

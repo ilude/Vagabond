@@ -66,10 +66,13 @@ module Vagabond
       Vagabond::VM::Commands.create_ssh_mapping(name)
       Vagabond::VM::Commands.start(name)
 
+      puts "Waiting for #{name} to boot up..."
       sleep 10
 
+      puts "Sending boot parameters..."
+
       sequence = [
-        '<Esc><Wait><Esc><Wait><Enter><Wait>',
+        '<Esc><Esc><Enter><Wait>',
         '/install/vmlinuz noapic preseed/url=http://%IP%:%PORT%/preseed.cfg ',
         'debian-installer=en_US auto locale=en_US kbd-chooser/method=us ',
         'hostname=%NAME% ',
