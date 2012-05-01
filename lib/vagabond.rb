@@ -4,6 +4,7 @@ require "vagabond/box"
 require "vagabond/template"
 require "vagabond/environment"
 require "vagabond/erbprocessor"
+require "vagabond/box_settings"
 
 
 module Vagabond

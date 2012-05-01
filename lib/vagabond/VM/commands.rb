@@ -20,7 +20,7 @@ module Vagabond
       end
 
       def self.create(boxname, ostype, memory=384, cpus=1)
-        execute "createvm --name \"#{boxname}\" --ostype #{ostype} --register"
+        execute "createvm --name \"#{boxname}\" --ostype #{ostype} --register --basefolder \"#{File.expand_path("builds/#{boxname}")}/\""
         execute "modifyvm \"#{boxname}\" --cpus #{cpus} --memory #{memory}"
       end
 
@@ -41,7 +41,11 @@ module Vagabond
       end
 
       def self.destroy(boxname)
-        execute "unregistervm \"#{boxname}\" --delete"
+        begin
+          execute "unregistervm \"#{boxname}\" --delete"
+        rescue
+
+        end
       end
 
       def self.create_ssh_mapping(boxname, guestport=22, hostport=7222)
@@ -183,16 +187,22 @@ module Vagabond
       def self.execute(args)
         output = ''
 
+        output, e, s = Open3.capture3("#{@virtualbox_command} #{args}")
+
+        if(s.exitstatus != 0)
+          raise "executing #{@virtualbox_command} #{args} => #{e}"
+        end
+
         #puts "#{@virtualbox_command} #{args}"
 
-        IO.popen "#{@virtualbox_command} #{args}" do |process|
-          output = process.read
-          process.close
-        end
+        #IO.popen "#{@virtualbox_command} #{args}" do |process|
+        #  output = process.read
+        #  process.close
+        #end
         
-        if $?.exitstatus!= 0
-          raise "executing #{@virtualbox_command} #{args}"
-        end
+        #if $?.exitstatus!= 0
+        #  raise "executing #{@virtualbox_command} #{args}"
+        #end
 
         output
       end

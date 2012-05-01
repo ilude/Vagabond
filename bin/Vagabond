@@ -47,12 +47,13 @@ command :mkbox do |c|
       box = Vagabond::Box.find(args[0])
       box.destroy if !box.nil?
     end
-
-    box = Vagabond::Box.create(args[0], Vagabond::Environment.new) do
-      self.template = options[:t]
+    begin
+      box = Vagabond::Box.create(args[0], options[:template], Vagabond::Environment.new) 
+      box.build
+    rescue Exception => e
+      puts "Error during processing: #{$!}"
+      puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
     end
-    box.build
-    
   end
 end
 
