@@ -62,11 +62,18 @@ module Vagabond
     def build
       iso_file = File.join("iso", @settings[:iso_file])
 
-      if(!File.exists? iso_file) 
+      if(!File.exists?(iso_file) &&  @settings[:iso_src])
+        puts "#{File.expand_path(iso_file)} not found!"
+        puts "Please wait while the file is downloaded..."
+
+        start_time = Time.now
+
         Vagabond::Web.download(@settings[:iso_src], iso_file)
+
+        puts "Download completed in #{Time.at(Time.now - start_time).gmtime.strftime("%H:%M:%S")}"
       end
 
-      raise "Please download #{@settings[:iso_file]} and place it at #{File.expand}" if(!File.exists? iso_file)
+      raise "Please download #{@settings[:iso_file]} and place it at #{File.expand_path(iso_file)}" if(!File.exists? iso_file)
 
       Vagabond::VM::Commands.create(name, @settings[:os_type_id])
       Vagabond::VM::Commands.create_sata_controller(name)

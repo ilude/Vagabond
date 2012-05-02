@@ -1,7 +1,9 @@
 module Vagabond
 	class Web
-    require 'open-uri'
+    require 'net/http'
     require 'webrick'
+    require 'progressbar'
+
     include WEBrick
 
     class FileServlet < WEBrick::HTTPServlet::AbstractServlet       
@@ -35,13 +37,37 @@ module Vagabond
       s.start
     end
 
-    def self.download(url, file)
-      File.open(file, "wb") do |saved_file|
-        # the following "open" is provided by open-uri
-        open(url) do |read_file|
-          saved_file.write(read_file.read)
-        end
-      end
+    def self.download(url, file, limit=3)
+
+      raise ArgumentError, 'HTTP redirect too deep' if limit == 0
+
+      uri = URI.parse(url)
+
+      Net::HTTP.start(uri.host,uri.port) {|http|
+        req = Net::HTTP::Get.new(uri.path, nil)
+        alreadyDL = 0
+        http.request(req) { |response|
+          # handle 301/302 redirects
+          if(response['location'])
+            self.download(response['location'], file, limit - 1)
+          else
+            size = response.content_length
+
+            pBar = ProgressBar.new("Downloading",size)
+            pBar.file_transfer_mode
+            File.open(file,'wb') {|file|
+              response.read_body {|segment|
+                alreadyDL += segment.length
+                if(alreadyDL != 0)
+                  pBar.set(alreadyDL)
+                end
+                file.write(segment)
+              }
+              pBar.finish
+            }
+          end          
+        }
+      }
     end
 
   end
