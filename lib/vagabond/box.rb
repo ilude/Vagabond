@@ -61,6 +61,11 @@ module Vagabond
 
     def build
       iso_file = File.join("iso", @settings[:iso_file])
+
+      if(!File.exists? iso_file) 
+        Vagabond::Web.download(@settings[:iso_src], iso_file)
+      end
+
       raise "Please download #{@settings[:iso_file]} and place it at #{File.expand}" if(!File.exists? iso_file)
 
       Vagabond::VM::Commands.create(name, @settings[:os_type_id])

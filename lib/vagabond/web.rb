@@ -1,6 +1,6 @@
 module Vagabond
 	class Web
-
+    require 'open-uri'
     require 'webrick'
     include WEBrick
 
@@ -34,5 +34,15 @@ module Vagabond
       }
       s.start
     end
+
+    def self.download(url, file)
+      File.open(file, "wb") do |saved_file|
+        # the following "open" is provided by open-uri
+        open(url) do |read_file|
+          saved_file.write(read_file.read)
+        end
+      end
+    end
+
   end
 end
