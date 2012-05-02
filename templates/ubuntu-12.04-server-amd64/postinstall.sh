@@ -10,10 +10,12 @@ setterm -blank 0
 # Apt-install various things necessary for Ruby, guest additions,
 # etc., and remove optional things to trim down the machine.
 apt-get -y update
-apt-get -y upgrade
 apt-get -y dist-upgrade
 apt-get -y install linux-headers-$(uname -r)
-apt-get -y install build-essential libreadline6 libreadline6-dev zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison curl git subversion 
+apt-get -y install build-essential libreadline6 libreadline6-dev zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison curl git
+
+# install ACPI support so we can shut the machine down without ssh
+apt-get -y install acpi-support
 
 # Install Ruby from source in /opt so that users of Vagrant
 # can install their own Rubies using packages or however.
