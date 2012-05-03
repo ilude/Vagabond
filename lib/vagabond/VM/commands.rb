@@ -13,7 +13,7 @@ module Vagabond
 
       def self.version
         if(@version.nil?)
-          @version = execute "-v"
+          @version = (execute "-v").gsub(/r\d+/, '')
         end
 
        @version
