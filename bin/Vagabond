@@ -38,6 +38,19 @@ command :mkbox do |c|
   c.desc 'The name of the template to use'
   c.default_value 'ubuntu-12.04-server-amd64'
   c.flag [:t, :template]
+
+  c.desc 'The number of cpus to configure the new box with'
+  c.default_value '1'
+  c.flag [:c, :cpus]
+
+  c.desc 'Megabytes of memory to configure the new box with'
+  c.default_value '384' 
+  c.flag [:m, :memory]
+
+  c.desc 'Megabytes of disk space to configure the new box with'
+  c.default_value '384' 
+  c.flag [:d, :disk_size]
+
   c.action do |global_options,options,args|
     if args.length < 1
       raise 'You must specify the name of your VM'
@@ -48,7 +61,7 @@ command :mkbox do |c|
       box.destroy if !box.nil?
     end
     begin
-      box = Vagabond::Box.create(args[0], options[:template], Vagabond::Environment.new) 
+      box = Vagabond::Box.create(args[0], options, Vagabond::Environment.new) 
       box.build
     rescue Exception => e
       puts "Error during processing: #{$!}"

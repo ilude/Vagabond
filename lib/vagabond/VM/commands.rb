@@ -19,25 +19,41 @@ module Vagabond
        @version
       end
 
-      def self.create(boxname, ostype, memory=384, cpus=1)
-        execute "createvm --name \"#{boxname}\" --ostype #{ostype} --register --basefolder \"#{File.expand_path("builds/#{boxname}")}/\""
-        execute "modifyvm \"#{boxname}\" --cpus #{cpus} --memory #{memory}"
+      def self.create(boxname, options = {})
+        options = {:memory => "384", :cpus => "1"}.merge(options)
+        execute "createvm --name \"#{boxname}\" --ostype #{options[:os_type]} --register --basefolder \"#{File.expand_path("builds/")}/\""
+        execute "modifyvm \"#{boxname}\" --cpus #{options[:cpus]} --memory #{options[:memory]}"
       end
 
-      def self.create_sata_controller(boxname, hostiocache="off")
-        execute "storagectl \"#{boxname}\" --name \"SATA Controller\" --add sata --sataportcount 4 --hostiocache #{hostiocache} --bootable on"
+      def self.create_sata_controller(boxname, options = {}, sata_name = "SATA Controller")
+        options = {:sataportcount => "4", :hostiocache => "off", :bootable => "on"}.merge(options)
+        command = "storagectl \"#{boxname}\" --name \"#{sata_name}\" --add sata"
+        command << " --sataportcount #{options[:sataportcount]}"
+        command << " --hostiocache #{options[:hostiocache]}"
+        command << " --bootable #{options[:bootable]}"
+        execute command
+        sata_name
       end
 
-      def self.create_disk(boxname, location, size) 
-        execute "createhd --filename \"builds/#{boxname}/#{location}\" --size #{size}"
+      def self.create_disk(boxname, disk_name, options = {})
+        options = {:disk_size => "10140", :disk_format => "VDI"}.merge(options)
+        disk_name = "#{disk_name}.#{options[:disk_format]}"
+        location = File.join("builds", boxname, disk_name)
+
+        command = "createhd --filename \"#{location}\""
+        command << " --size #{options[:disk_size]}" 
+        command << " --format #{options[:disk_format]}"
+        execute command
+
+        disk_name
       end
 
-      def self.attach_disk(boxname, location)
-        execute "storageattach \"#{boxname}\" --storagectl \"SATA Controller\" --port 0 --device 0 --type hdd --medium \"builds/#{boxname}/#{location}\""
+      def self.attach_disk(boxname, sata_name, location)
+        execute "storageattach \"#{boxname}\" --storagectl \"#{sata_name}\" --port 0 --device 0 --type hdd --medium \"builds/#{boxname}/#{location}\""
       end
 
-      def self.attach_iso(boxname, location)
-        execute "storageattach \"#{boxname}\" --storagectl \"SATA Controller\" --port 1 --device 0 --type dvddrive --medium \"#{location}\""
+      def self.attach_iso(boxname, sata_name, location)
+        execute "storageattach \"#{boxname}\" --storagectl \"#{sata_name}\" --port 1 --device 0 --type dvddrive --medium \"#{location}\""
       end
 
       def self.destroy(boxname)
@@ -48,7 +64,7 @@ module Vagabond
         end
       end
 
-      def self.create_ssh_mapping(boxname, guestport=22, hostport=7222)
+      def self.create_ssh_mapping(boxname, hostport=7222, guestport=22)
         execute "modifyvm \"#{boxname}\" --natpf1 'guestssh,tcp,,#{hostport},,#{guestport}'"
       end
 
@@ -187,22 +203,13 @@ module Vagabond
       def self.execute(args)
         output = ''
 
+        #puts "#{@virtualbox_command} #{args}"
+
         output, e, s = Open3.capture3("#{@virtualbox_command} #{args}")
 
         if(s.exitstatus != 0)
           raise "executing #{@virtualbox_command} #{args} => #{e}"
         end
-
-        #puts "#{@virtualbox_command} #{args}"
-
-        #IO.popen "#{@virtualbox_command} #{args}" do |process|
-        #  output = process.read
-        #  process.close
-        #end
-        
-        #if $?.exitstatus!= 0
-        #  raise "executing #{@virtualbox_command} #{args}"
-        #end
 
         output
       end

@@ -11,18 +11,6 @@ module Vagabond
       @build_path = File.join(env.builds_path, name)
     end
 
-    def template=(value)
-      @template = value
-    end
-
-    def template
-      @template
-    end
-
-    #def self.find_or_create(name, env, &block)
-    #  find(name, env) || create(name, env, &block)
-    #end
-
     def self.find(name, env = Environment.new)
       box = Box.new(name, env)
       if(box.created?)
@@ -33,31 +21,23 @@ module Vagabond
       end
     end
     
-    def self.create(name, template, env, settings = 'settings.rb')
-      puts "creating box #{name}"
+    def self.create(name, options = {:template => 'ubuntu-12.04-server-amd64'}, env)
+      puts "creating box #{name} from #{options[:template]}"
       box = Box.new(name, env)
       
       raise Exception.new("Box #{name} already exist!") if(box.created?)
 
-      box.template = template
+      template_path = File.join(env.template_path, options[:template])
+      raise Exception.new("Template #{options[:template]} does not exist at #{template_path}!") unless Dir.exists?(template_path)
 
-      template = Template.new(box.template, env);
+      box.template = options[:template]
 
-      raise Exception, "Template #{template} does not exist at #{template.path}!" unless(template.exists?)
-
-      template.create(box)
-
-      box.settings = Vagabond::BoxSettings.new File.join(env.builds_path, name, settings)
+      box.settings = Vagabond::BoxSettings.new(File.join(template_path, 'settings.rb')).merge(options)
       
       box
     end
 
-    def destroy 
-      if(created?)
-        Vagabond::VM::Commands.destroy(name)
-        FileUtils.remove_dir(build_path)
-      end
-    end
+    
 
     def build
       iso_file = File.join("iso", @settings[:iso_file])
@@ -75,11 +55,11 @@ module Vagabond
 
       raise "Please download #{@settings[:iso_file]} and place it at #{File.expand_path(iso_file)}" if(!File.exists? iso_file)
 
-      Vagabond::VM::Commands.create(name, @settings[:os_type_id])
-      Vagabond::VM::Commands.create_sata_controller(name)
-      Vagabond::VM::Commands.create_disk(name, "#{name}.vdi", @settings[:disk_size])
-      Vagabond::VM::Commands.attach_disk(name, "#{name}.vdi")
-      Vagabond::VM::Commands.attach_iso(name, iso_file)
+      Vagabond::VM::Commands.create(name, @settings)
+      sata_name = Vagabond::VM::Commands.create_sata_controller(name, @settings)
+      disk_name = Vagabond::VM::Commands.create_disk(name, name, @settings)
+      Vagabond::VM::Commands.attach_disk(name, sata_name, disk_name)
+      Vagabond::VM::Commands.attach_iso(name, sata_name, iso_file)
       Vagabond::VM::Commands.set_boot_order(name)
       Vagabond::VM::Commands.create_ssh_mapping(name)
       Vagabond::VM::Commands.start(name)
@@ -87,34 +67,27 @@ module Vagabond
       puts "Waiting for #{name} to boot up..."
       sleep @settings[:boot_wait]
 
-      puts "Sending boot parameters..."
+      if(@settings[:boot_cmd_sequence]) 
+        puts "Sending boot parameters..."
 
-      @settings[:boot_cmd_sequence].each { |s|  
-        s.gsub!(/%IP%/, @env.host);
-        s.gsub!(/%PORT%/, @env.port.to_s);
-        s.gsub!(/%NAME%/, name);
+        @settings[:boot_cmd_sequence].each { |s|  
+          s.gsub!(/%IP%/, @env.host);
+          s.gsub!(/%PORT%/, @env.port.to_s);
+          s.gsub!(/%NAME%/, name);
 
-        Vagabond::VM::Commands.send_sequence(name,s)
-      }
+          Vagabond::VM::Commands.send_sequence(name,s)
+        }
+      end
 
-      Vagabond::Web.wait_for_request({
-        :filename => "preseed.cfg",
-        :web_dir => build_path},
-        self
-      )
-
-      Vagabond::Web.wait_for_request({
-        :filename => "latecommand.sh",
-        :web_dir => build_path},
-        self
-      )
-
-      Vagabond::Web.wait_for_request({
-        :filename => "postinstall.sh",
-        :web_dir => build_path},
-        self
-      )
-
+      if(@settings[:install_files]) 
+        @settings[:install_files].each do |file|
+          Vagabond::Web.wait_for_request({
+            :filename => file,
+            :web_dir => File.join(env.template_path, @template)},
+            self
+          )
+        end
+      end
     end
 
     def start
@@ -123,6 +96,13 @@ module Vagabond
 
     def created?
       return Dir.exists?(File.join(@env.builds_path, @name))
+    end
+
+    def destroy 
+      if(created?)
+        Vagabond::VM::Commands.destroy(name)
+        FileUtils.remove_dir(build_path)
+      end
     end
     
     def get_binding

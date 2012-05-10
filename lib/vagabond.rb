@@ -1,7 +1,6 @@
 require "vagabond/VM/commands"
 require "vagabond/web"
 require "vagabond/box"
-require "vagabond/template"
 require "vagabond/environment"
 require "vagabond/erbprocessor"
 require "vagabond/box_settings"
