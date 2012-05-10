@@ -1,11 +1,16 @@
 #!/bin/sh -e
 # set the build date and virtual box version
-date > /etc/vagabond_build_date
-echo "<%= env.vbox_version %>" > /etc/vagabond_vbox_version
-#echo "4.1.8" > /etc/vagabond_vbox_version
+mkdir /etc/vagabond
+date > /etc/vagabond/build_date
+echo "<%= env.vbox_version %>" > /etc/vagabond/vbox_version
 
 # disable screen blanking
 setterm -blank 0
+
+#allow adm group to sudo without password
+/bin/cp /etc/sudoers /etc/sudoers.orig
+/bin/sed -i -e '/Defaults\s\+env_reset/a Defaults\texempt_group=admin' /etc/sudoers
+/bin/sed -i -e 's/%admin ALL=(ALL) ALL/%adm ALL=NOPASSWD:ALL/g' /etc/sudoers
 
 # Apt-install various things necessary for Ruby, guest additions,
 # etc., and remove optional things to trim down the machine.
@@ -97,6 +102,7 @@ rm /lib/udev/rules.d/75-persistent-net-generator.rules
 echo "Adding a 2 sec delay to the interface up, to make the dhclient happy"
 echo "pre-up sleep 2" >> /etc/network/interfaces
 
+cp /etc/rc.local /etc/vagabond
 mv /etc/rc.local.orig /etc/rc.local
 rm /etc/rc.local.orig
 
