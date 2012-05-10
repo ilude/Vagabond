@@ -104,6 +104,8 @@ module Vagabond
     def destroy 
       if(created?)
         Vagabond::VM::Commands.destroy(name)
+      end
+      if(Dir.exists? build_path)
         FileUtils.remove_dir(build_path)
       end
     end

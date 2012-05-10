@@ -2,10 +2,12 @@
 # set the build date and virtual box version
 mkdir /etc/vagabond
 date > /etc/vagabond/build_date
+echo "<%= template %>" > /etc/vagabond/template
 echo "<%= env.vbox_version %>" > /etc/vagabond/vbox_version
 
-# disable screen blanking
-setterm -blank 0
+# disable screen blanking and make sure it is still disabled after a reboot
+setterm -blank 0 -powersave off -powerdown 0
+echo "setterm -blank 0 -powersave off -powerdown 0" >> /etc/rc.local.orig
 
 #allow adm group to sudo without password
 /bin/cp /etc/sudoers /etc/sudoers.orig
@@ -15,7 +17,7 @@ setterm -blank 0
 # Apt-install various things necessary for Ruby, guest additions,
 # etc., and remove optional things to trim down the machine.
 apt-get -y update
-apt-get -y dist-upgrade
+#apt-get -y dist-upgrade
 apt-get -y install linux-headers-$(uname -r)
 apt-get -y install build-essential libreadline6 libreadline6-dev zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison git
 
@@ -35,9 +37,9 @@ cd ..
 rm -rf ruby-1.9.3-p194
 
 # Update RubyGems
-/usr/local/bin/gem update -y --system --no-ri --no-rdoc
+/usr/local/bin/gem update --system --no-ri --no-rdoc
 /usr/local/bin/gem update -y --no-ri --no-rdoc
-/usr/local/bin/gem clean -y
+/usr/local/bin/gem clean -q
 
 # Install Bundler & chef
 /usr/local/bin/gem install bundler chef --no-ri --no-rdoc
@@ -79,7 +81,7 @@ cat > /etc/chef/node.json<<EOF
 }
 EOF
 
-chef-solo
+/usr/local/bin/chef-solo
 
 # Remove items used for building, since they aren't needed anymore
 # apt-get -y remove linux-headers-$(uname -r) build-essential
