@@ -42,7 +42,7 @@ rm -rf ruby-1.9.3-p194
 /usr/local/bin/gem clean -q
 
 # Install Bundler & chef
-/usr/local/bin/gem install bundler chef --no-ri --no-rdoc
+/usr/local/bin/gem install -y bundler chef --no-ri --no-rdoc
 
 # setup chef directories
 mkdir /etc/chef
