@@ -40,16 +40,13 @@ command :mkbox do |c|
   c.flag [:t, :template]
 
   c.desc 'The number of cpus to configure the new box with'
-  c.default_value '1'
-  c.flag [:c, :cpus]
+  c.flag [:cpus]
 
   c.desc 'Megabytes of memory to configure the new box with'
-  c.default_value '384' 
-  c.flag [:m, :memory]
+  c.flag [:memory]
 
   c.desc 'Megabytes of disk space to configure the new box with'
-  c.default_value '384' 
-  c.flag [:d, :disk_size]
+  c.flag [:disk_size]
 
   c.action do |global_options,options,args|
     if args.length < 1

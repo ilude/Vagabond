@@ -32,7 +32,10 @@ module Vagabond
 
       box.template = options[:template]
 
-      box.settings = Vagabond::BoxSettings.new(File.join(template_path, 'settings.rb')).merge(options)
+      settings = Vagabond::BoxSettings.new(File.join(template_path, 'settings.rb'))
+
+      # clean out empty options
+      box.settings = settings.merge(options.delete_if {|key,value| value.nil?})
       
       box
     end
