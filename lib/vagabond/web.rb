@@ -26,8 +26,7 @@ module Vagabond
 		end 
 
     def self.wait_for_request(options, box)  
-      @box = 
-      s= HTTPServer.new( :Port => box.env.port )
+      s = HTTPServer.new(:AccessLog => [], :Logger => WEBrick::Log::new(self.null, 7), :Port => box.env.port )
       s.mount("/#{options[:filename]}", FileServlet, File.join(options[:web_dir] || "",options[:filename]), box)
       trap("INT"){
 				s.shutdown
@@ -35,6 +34,10 @@ module Vagabond
 				exit
       }
       s.start
+    end
+
+    def self.null
+      RbConfig::CONFIG['host_os'] =~ /mingw|mswin/ ? 'NUL' : '/dev/null'
     end
 
     def self.download(url, file, limit=3)

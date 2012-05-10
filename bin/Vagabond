@@ -40,13 +40,13 @@ command :mkbox do |c|
   c.flag [:t, :template]
 
   c.desc 'The number of cpus to configure the new box with'
-  c.flag [:cpus]
+  c.flag [:c, :cpus]
 
   c.desc 'Megabytes of memory to configure the new box with'
-  c.flag [:memory]
+  c.flag [:m, :memory]
 
-  c.desc 'Megabytes of disk space to configure the new box with'
-  c.flag [:disk_size]
+  c.desc 'Gigabytes of disk space to configure the new box with'
+  c.flag [:d, :disk_size]
 
   c.action do |global_options,options,args|
     if args.length < 1
@@ -80,15 +80,16 @@ pre do |global,command,options,args|
   # Pre logic here
   # Return true to proceed; false to abort and not call the
   # chosen command
-  # Use skips_pre before a command to skip this block
-  # on that command only
+  
   if global[:v]
     puts "Vagabond: #{Vagabond::VERSION}"
     puts "VirtualBox: #{Vagabond::VM::Commands.version}"
     false
-  else
-    true
+  elsif command.name == :mkbox && options[:disk_size]
+    options[:disk_size] = (options[:disk_size].to_f * 1024).to_i
   end
+
+  true
 end
 
 post do |global,command,options,args|

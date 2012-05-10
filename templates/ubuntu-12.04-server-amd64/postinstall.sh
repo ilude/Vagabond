@@ -37,11 +37,17 @@ cd ..
 rm -rf ruby-1.9.3-p194
 
 # Update RubyGems
+echo "Updating RubyGem System..."
 /usr/local/bin/gem update --system --no-ri --no-rdoc
+
+echo "Updating installed gems..."
 /usr/local/bin/gem update -y --no-ri --no-rdoc
-/usr/local/bin/gem clean -q
+
+#echo "Cleaning up gems..."
+#/usr/local/bin/gem clean -q
 
 # Install Bundler & chef
+echo "Installing Bundler and Chef..."
 /usr/local/bin/gem install -y bundler chef --no-ri --no-rdoc
 
 # setup chef directories
