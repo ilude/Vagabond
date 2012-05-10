@@ -12,9 +12,10 @@ setterm -blank 0
 apt-get -y update
 apt-get -y dist-upgrade
 apt-get -y install linux-headers-$(uname -r)
-apt-get -y install build-essential libreadline6 libreadline6-dev zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison curl git
+apt-get -y install build-essential libreadline6 libreadline6-dev zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison git
 
 # install ACPI support so we can shut the machine down without ssh
+# added this to the preseed
 apt-get -y install acpi-support
 
 # Install Ruby from source in /opt so that users of Vagrant
@@ -29,39 +30,51 @@ cd ..
 rm -rf ruby-1.9.3-p194
 
 # Update RubyGems
-/usr/local/bin/gem update --system --no-ri --no-rdoc
-/usr/local/bin/gem update --no-ri --no-rdoc
-/usr/local/bin/gem clean
+/usr/local/bin/gem update -y --system --no-ri --no-rdoc
+/usr/local/bin/gem update -y --no-ri --no-rdoc
+/usr/local/bin/gem clean -y
 
 # Install Bundler & chef
 /usr/local/bin/gem install bundler chef --no-ri --no-rdoc
 
-# Installing vagrant keys
-#mkdir /home/vagrant/.ssh
-#chmod 700 /home/vagrant/.ssh
-#cd /home/vagrant/.ssh
-#wget --no-check-certificate 'https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub' -O authorized_keys
-#chmod 600 /home/vagrant/.ssh/authorized_keys
-#chown -R vagrant /home/vagrant/.ssh
+# setup chef directories
+mkdir /etc/chef
+mkdir /var/chef
+mkdir /var/chef/cache
 
-# Installing the virtualbox guest additions
-#VBOX_VERSION=$(cat /home/vagrant/.vbox_version)
-#cd /tmp
-#wget http://download.virtualbox.org/virtualbox/$VBOX_VERSION/VBoxGuestAdditions_$VBOX_VERSION.iso
-#mount -o loop VBoxGuestAdditions_$VBOX_VERSION.iso /mnt
-#sh /mnt/VBoxLinuxAdditions.run
-#rm VBoxGuestAdditions_$VBOX_VERSION.iso
+# clone cookbooks
+git clone https://github.com/ilude/Cookbooks.git /var/chef/cookbooks
 
-#VBOX_VERSION=$(cat /etc/vagabond_vbox_version)
-#wget http://download.virtualbox.org/virtualbox/4.1.8/VBoxGuestAdditions_4.1.8.iso
-#wget http://download.virtualbox.org/virtualbox/$VBOX_VERSION/VBoxGuestAdditions_$VBOX_VERSION.iso
-#mount -o loop,ro VBoxGuestAdditions_4.1.8.iso
-#mount -o loop,ro VBoxGuestAdditions_$VBOX_VERSION.iso /mnt
-#sh /mnt/VBoxLinuxAdditions.run
-#umount /mnt
-#rm VBoxGuestAdditions_4.1.8.iso
-#rm VBoxGuestAdditions_$VBOX_VERSION.iso
-#unset VBOX_VERSION
+# create solo.rb file
+cat > /etc/chef/solo.rb<<EOF
+json_attribs "/etc/chef/node.json"
+cookbook_path "/var/chef/cookbooks"
+file_cache_path "/var/chef/cache"
+EOF
+
+# create chef-update command
+cat > /usr/local/bin/chef-update<<EOF
+#!/bin/bash
+
+pushd /var/chef/cookbooks
+git pull
+popd
+
+chef-solo
+EOF
+
+chmod +x /usr/local/bin/chef-update
+
+cat > /etc/chef/node.json<<EOF
+{
+  "user": {
+    "name": "vagabond"
+  },
+  "run_list": ["recipe[default]"]
+}
+EOF
+
+chef-solo
 
 # Remove items used for building, since they aren't needed anymore
 # apt-get -y remove linux-headers-$(uname -r) build-essential
