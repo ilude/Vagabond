@@ -2,7 +2,7 @@
 
 # Disable root password
 # Chef must install new user
-/usr/bin/passwd -l root
+# /usr/bin/passwd -l root
 
 # set the build date and virtual box version
 mkdir /etc/vagabond
