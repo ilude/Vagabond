@@ -89,6 +89,9 @@ command :mkbox do |c|
   c.desc 'Gigabytes of disk space to configure the new box with'
   c.flag [:d, :disk_size]
 
+  c.desc 'Gigabytes of disk space to configure the new box with'
+  c.flag [:i, :ip]
+
   c.action do |global_options,options,args|
     if args.length < 1
       raise 'You must specify the name of your VM'

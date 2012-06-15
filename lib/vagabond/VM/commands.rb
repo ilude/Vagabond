@@ -64,8 +64,18 @@ module Vagabond
         end
       end
 
+
+
       def self.create_ssh_mapping(boxname, hostport=7222, guestport=22)
         execute "modifyvm \"#{boxname}\" --natpf1 'guestssh,tcp,,#{hostport},,#{guestport}'"
+      end
+
+      def self.create_inetface(boxname, options = {})
+        if(options[:ip])
+          execute "modifyvm \"#{boxname}\" --nic1 bridged"
+        else
+          create_ssh_mapping(boxname)
+        end
       end
 
       def self.set_boot_order(boxname)

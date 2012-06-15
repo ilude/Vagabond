@@ -10,11 +10,6 @@ echo "<%= env.vbox_version %>" > /etc/vagabond/vbox_version
 setterm -blank 0 -powersave off -powerdown 0
 echo "setterm -blank 0 -powersave off -powerdown 0" >> /etc/rc.local.orig
 
-#allow adm group to sudo without password
-/bin/cp /etc/sudoers /etc/sudoers.orig
-/bin/sed -i -e '/Defaults\s\+env_reset/a Defaults\texempt_group=admin' /etc/sudoers
-/bin/sed -i -e 's/%admin ALL=(ALL) ALL/%adm ALL=NOPASSWD:ALL/g' /etc/sudoers
-
 # Apt-install various things necessary for Ruby, guest additions,
 # etc., and remove optional things to trim down the machine.
 apt-get -y update
@@ -43,9 +38,6 @@ echo "Updating RubyGem System..."
 
 echo "Updating installed gems..."
 /usr/local/bin/gem update -y --no-ri --no-rdoc
-
-#echo "Cleaning up gems..."
-#/usr/local/bin/gem clean -q
 
 # Install Bundler & chef
 echo "Installing Bundler and Chef..."
@@ -80,12 +72,7 @@ EOF
 chmod +x /usr/local/bin/chef-update
 
 cat > /etc/chef/node.json<<EOF
-{
-  "user": {
-    "name": "vagabond"
-  },
-  "run_list": ["recipe[default]"]
-}
+<%= node_json %>
 EOF
 
 /usr/local/bin/chef-solo
@@ -108,11 +95,11 @@ mkdir /etc/udev/rules.d/70-persistent-net.rules
 rm -rf /dev/.udev/
 rm /lib/udev/rules.d/75-persistent-net-generator.rules
 
-echo "Adding a 2 sec delay to the interface up, to make the dhclient happy"
-echo "pre-up sleep 2" >> /etc/network/interfaces
-
 cp /etc/rc.local /etc/vagabond
 mv /etc/rc.local.orig /etc/rc.local
 rm /etc/rc.local.orig
+
+echo "Going down for a clean reboot!"
+shutdown -r now
 
 exit 0 

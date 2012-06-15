@@ -26,4 +26,5 @@ lib/vagabond.rb
   s.add_runtime_dependency('gli')
   s.add_runtime_dependency('progressbar')
   s.add_runtime_dependency('ruby-ip')
+  s.add_runtime_dependency('json_builder')
 end

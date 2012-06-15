@@ -1,4 +1,6 @@
 require 'fileutils'
+require 'json_builder'
+require 'ip'
 
 module Vagabond
   class Box
@@ -62,7 +64,7 @@ module Vagabond
       Vagabond::VM::Commands.attach_disk(name, sata_name, disk_name)
       Vagabond::VM::Commands.attach_iso(name, sata_name, iso_file)
       Vagabond::VM::Commands.set_boot_order(name)
-      Vagabond::VM::Commands.create_ssh_mapping(name)
+      Vagabond::VM::Commands.create_inetface(name, @settings)
       Vagabond::VM::Commands.start(name)
 
       puts "Waiting for #{name} to boot up..."
@@ -109,6 +111,26 @@ module Vagabond
       end
       if(Dir.exists? build_path)
         FileUtils.remove_dir(build_path)
+      end
+    end
+
+    def node_json
+      ip = IP.new(address) rescue nil
+      return JSONBuilder::Compiler.generate(:pretty => true) do
+        user do
+          name 'vagabond'
+        end
+        if ip 
+          network do
+            static true
+            ip ip.to_addr
+            netmask ip.netmask.to_s
+            network ip.network.to_addr
+            broadcast ip.broadcast.to_addr
+            gateway ip.network(1).to_addr
+          end
+        end
+        run_list ["recipe[default]", "recipe[default::interfaces]"] 
       end
     end
     
