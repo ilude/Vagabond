@@ -21,7 +21,7 @@ module Vagabond
       end
     end
     
-    def self.create(name, options = {:template => 'ubuntu-12.04-server-amd64'}, env)
+    def self.create(name, options = {:template => 'ubuntu-12.04-server-amd64', :address => :dhcp}, env)
       puts "creating box #{name} from #{options[:template]}"
       box = Box.new(name, env)
       
@@ -39,8 +39,6 @@ module Vagabond
       
       box
     end
-
-    
 
     def build
       iso_file = File.join("iso", @settings[:iso_file])
@@ -93,8 +91,12 @@ module Vagabond
       end
     end
 
-    def start
-      Vagabond::VM::Commands.start(name)
+    def start(type = :normal)
+      Vagabond::VM::Commands.start(name, type)
+    end
+
+    def stop(type = :normal)
+      Vagabond::VM::Commands.stop(name, type)
     end
 
     def created?

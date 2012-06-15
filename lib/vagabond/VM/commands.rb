@@ -75,8 +75,19 @@ module Vagabond
         execute "modifyvm \"#{boxname}\" --boot4 none"
       end
 
-      def self.start(boxname)
-        execute "startvm \"#{boxname}\""
+      def self.start(boxname, type = :normal)
+        type_switch = (type == :headless) ? "--type headless" : ''
+        execute "startvm \"#{boxname}\" #{type_switch}"
+      end
+
+      def self.stop(boxname, type = :normal)
+        type_switch = (type == :force) ? "poweroff" : "acpipowerbutton"
+        execute "controlvm \"#{boxname}\" #{type_switch}"
+      end
+
+      def self.list(state = :all)
+        state_switch = (state == :all) ? "vms" : "runningvms"
+        execute "-q list #{state_switch}"
       end
 
       def self.send_sequence(boxname,s)

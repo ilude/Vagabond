@@ -29,6 +29,47 @@ switch [:v,:version]
 #arg_name 'The name of the argument'
 #flag [:f,:flagname]
 
+desc 'list running vms'
+command :ls do |c|
+  c.desc 'force the list to include all virtual machines'
+  c.switch [:a, :all]
+
+  c.action do |global_options,options,args|
+    puts Vagabond::VM::Commands.list((options[:a]) ? :all : :running )
+  end
+end
+
+desc 'Bring a box up'
+arg_name 'The name of the virtual machine'
+command :up do |c|
+  c.desc 'Bring the box up in headless mode'
+  c.switch [:h, :headless]
+
+  c.action do |global_options,options,args|
+    if args.length < 1
+      raise 'You must specify the name of your VM'
+    end
+    box = Vagabond::Box.find(args[0])
+    box.start((options[:h]) ? :headless : :normal)
+  end
+end
+
+desc 'Bring a box down'
+arg_name 'The name of the virtual machine'
+command :down do |c|
+  c.desc 'Force a hard shutdown instead of sending an acpi shutdown signel'
+  c.switch [:f, :force]
+
+  c.action do |global_options,options,args|
+    if args.length < 1
+      raise 'You must specify the name of your VM'
+    end
+    box = Vagabond::Box.find(args[0])
+    box.stop((options[:f]) ? :force : :normal)
+  end
+end
+
+
 desc 'Create a new virtual machine image'
 arg_name 'The name of the virtual machine'
 command :mkbox do |c|
