@@ -25,4 +25,5 @@ lib/vagabond.rb
   s.add_development_dependency('rdoc')
   s.add_runtime_dependency('gli')
   s.add_runtime_dependency('progressbar')
+  s.add_runtime_dependency('ruby-ip')
 end
