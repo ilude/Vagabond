@@ -23,8 +23,4 @@ lib/vagabond.rb
   s.executables << 'Vagabond'
   s.add_development_dependency('rake')
   s.add_development_dependency('rdoc')
-  s.add_runtime_dependency('gli')
-  s.add_runtime_dependency('progressbar')
-  s.add_runtime_dependency('ruby-ip')
-  s.add_runtime_dependency('json_builder')
 end

@@ -2,7 +2,9 @@ module Vagabond
   module VM
     class Commands
       @virtualbox_command = 'vboxmanage'
-      
+      @interfaces = []
+      @host_ifaces = []
+
       def self.virtualbox_command
         @virtualbox_command
       end
@@ -64,17 +66,16 @@ module Vagabond
         end
       end
 
-
-
       def self.create_ssh_mapping(boxname, hostport=7222, guestport=22)
         execute "modifyvm \"#{boxname}\" --natpf1 'guestssh,tcp,,#{hostport},,#{guestport}'"
       end
 
       def self.create_inetface(boxname, options = {})
         if(options[:ip])
-          execute "modifyvm \"#{boxname}\" --nic1 bridged"
+          execute "modifyvm \"#{boxname}\" --nic1 bridged --nictype1 virtio --bridgeadapter1 \"#{get_bridging_interfaces[0][:name]}\""
+          #execute "modifyvm \"#{boxname}\" --nic2 hostonly --hostonlyadapter2 \"#{get_host_interfaces[0][:name]}\""
         else
-          create_ssh_mapping(boxname)
+          #create_ssh_mapping(boxname)
         end
       end
 
@@ -98,6 +99,38 @@ module Vagabond
       def self.list(state = :all)
         state_switch = (state == :all) ? "vms" : "runningvms"
         execute "-q list #{state_switch}"
+      end
+
+      def self.get_bridging_interfaces
+        if(@interfaces.length == 0)
+          output = (execute "list bridgedifs").split(/\r?\n/)
+          output.each do |line|
+            key, value = line.split(':').map {|item| item.strip }
+            if(line.start_with?("Name:")) 
+              @interfaces << {:name => value}
+            elsif !key.nil? 
+              @interfaces.last[key.downcase.to_sym] = value
+            end
+          end 
+        end
+
+        @interfaces
+      end
+
+      def self.get_host_interfaces
+        if(@host_ifaces.length == 0)
+          output = (execute "list hostonlyifs").split(/\r?\n/)
+          output.each do |line|
+            key, value = line.split(':').map {|item| item.strip }
+            if(line.start_with?("Name:")) 
+              @host_ifaces << {:name => value}
+            elsif !key.nil? 
+              @host_ifaces.last[key.downcase.to_sym] = value
+            end
+          end 
+        end
+
+        @host_ifaces
       end
 
       def self.send_sequence(boxname,s)
