@@ -7,7 +7,7 @@ module Vagabond
         :template_path => File.join(Dir.pwd, "templates"),
         :builds_path => File.join(Dir.pwd, "builds"),
         :host => UDPSocket.open {|socket| socket.connect("64.233.187.99", 1); socket.addr.last},
-        :port => 7070,
+        :port => Random.rand(9999 - 2000) + 2000,
         :vbox_version => Vagabond::VM::Commands.version
       }
 
