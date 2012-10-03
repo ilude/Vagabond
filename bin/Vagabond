@@ -15,11 +15,9 @@ require 'rubygems'
 require 'gli'
 require 'vagabond'
 
-include GLI
+include GLI::App
 
 program_desc Vagabond::DESCRIPTION
-
-version Vagabond::VERSION
 
 desc 'Print Vagabond Version'
 switch [:v,:version]
@@ -148,4 +146,4 @@ on_error do |exception|
   true
 end
 
-exit GLI.run(ARGV)
+exit run(ARGV)
