@@ -1,6 +1,8 @@
 module Vagabond
   module VM
     class Commands
+      require 'open3'
+
       @virtualbox_command = 'vboxmanage'
       @interfaces = []
       @host_ifaces = []
